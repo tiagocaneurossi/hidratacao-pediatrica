@@ -1,0 +1,17 @@
+{
+  "name": "Hidratação Pediátrica",
+  "short_name": "Hidratação",
+  "description": "Calculadora perioperatória pediátrica: hidratação, preparo de glicose e hemoterapia por peso.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f7fc",
+  "theme_color": "#2f7fe8",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

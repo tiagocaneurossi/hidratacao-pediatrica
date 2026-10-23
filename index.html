@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidratação Pediátrica</title>
+<meta name="description" content="Calculadora perioperatória pediátrica: hidratação, preparo de glicose e hemoterapia por peso. Uso educacional.">
+<meta name="theme-color" content="#2f7fe8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hidratação">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: playful one-column clinical app — hero with mascot, input card, colour-coded sticky tabs, one colour per section */
+:root{
+  --bg:#f3f7fc; --surface:#ffffff; --ink:#1d2939; --muted:#5f6c80; --line:#e3e9f1;
+  --mint:#10a090; --coral:#f0604d; --sky:#2f7fe8; --sun:#f3a712; --berry:#d63370; --grape:#7a5ad8;
+  --onc:#ffffff;
+  --c:var(--sky);
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1520; --surface:#18202e; --ink:#eef2f8; --muted:#9ba8ba; --line:#2a3446;
+  --mint:#3fd3bf; --coral:#ff8c7c; --sky:#6eabff; --sun:#ffc94f; --berry:#ff6fa0; --grape:#ab90ff;
+  --onc:#0f1520; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1520; --surface:#18202e; --ink:#eef2f8; --muted:#9ba8ba; --line:#2a3446;
+  --mint:#3fd3bf; --coral:#ff8c7c; --sky:#6eabff; --sun:#ffc94f; --berry:#ff6fa0; --grape:#ab90ff;
+  --onc:#0f1520; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  background-image:radial-gradient(circle,color-mix(in srgb,var(--sky) 10%,transparent) 1.5px,transparent 1.6px);background-size:22px 22px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto;padding-block:16px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:16px}
+
+/* colour scopes */
+#hs,#t-hs,.c-mint{--c:var(--mint)}
+#berry,#t-berry,.c-coral{--c:var(--coral)}
+#eu,#t-eu,.c-sky{--c:var(--sky)}
+#prep,#t-prep,.c-sun{--c:var(--sun)}
+#sangue,#t-sangue,.c-berry{--c:var(--berry)}
+#cmp,#t-cmp,.c-grape{--c:var(--grape)}
+#t-prep{--onc:#3b2a00}
+.panel,.tabs button,.seg label,.ic,.chip,.recipe,.prodc,.alert,.hero,details{
+  --soft:color-mix(in srgb,var(--c) 13%,var(--surface));
+  --strong:color-mix(in srgb,var(--c) 72%,var(--ink))}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:20px 20px 22px;display:flex;align-items:center;gap:14px;
+  background:
+    radial-gradient(circle at 92% 8%,color-mix(in srgb,var(--sun) 30%,transparent) 0 54px,transparent 55px),
+    radial-gradient(circle at 4% 110%,color-mix(in srgb,var(--mint) 26%,transparent) 0 70px,transparent 71px),
+    radial-gradient(circle at 62% 120%,color-mix(in srgb,var(--coral) 22%,transparent) 0 40px,transparent 41px),
+    var(--soft);}
+.hero-txt{flex:1;min-width:0;position:relative}
+.kicker{display:inline-block;font-weight:800;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--surface);background:var(--sky);padding:3px 10px;border-radius:999px}
+.hero h1{font-family:var(--f-display);font-weight:800;font-size:2rem;line-height:1;margin:8px 0 4px;letter-spacing:-.01em;text-wrap:balance}
+.hero h1 span{color:var(--sky)}
+.hero p{margin:0;color:var(--muted);font-size:.92rem;font-weight:600}
+.mascot{flex:none;width:92px;height:104px;position:relative}
+@media (prefers-reduced-motion:no-preference){.mascot{animation:bob 3.2s ease-in-out infinite}}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-3deg)}}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:0 6px 20px -14px color-mix(in srgb,var(--ink) 40%,transparent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.lbl{font-size:.8rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:7px}
+.ic{width:24px;height:24px;border-radius:8px;background:var(--soft);color:var(--strong);display:inline-grid;place-items:center;flex:none}
+.ic svg{width:15px;height:15px}
+input[type=number],select{font:inherit;font-weight:700;font-size:1.15rem;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--bg);
+  border:2px solid transparent;border-radius:14px;padding:10px 12px;width:100%;min-width:0;transition:border-color .15s}
+select{font-size:1rem}
+input:focus,select:focus{border-color:var(--sky);outline:none}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.age{display:flex;gap:6px}.age input{flex:1}.age select{flex:0 0 100px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{display:flex;flex-direction:column;gap:3px;padding:10px;border:2px solid var(--line);border-radius:16px;cursor:pointer;background:var(--surface);min-width:0;transition:all .15s}
+.seg label b{font-family:var(--f-display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.seg label small{font-size:.72rem;color:var(--muted);line-height:1.25;font-weight:600}
+.dots{display:flex;gap:4px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+#p1+label{--c:var(--mint)} #p2+label{--c:var(--sun)} #p3+label{--c:var(--coral)}
+#p1+label .dots i:nth-child(-n+1),#p2+label .dots i:nth-child(-n+2),#p3+label .dots i{background:var(--c)}
+.seg input:checked+label{background:var(--soft);border-color:var(--c)}
+.seg input:focus-visible+label{outline:3px solid var(--sky);outline-offset:2px}
+.summary{display:flex;flex-wrap:wrap;gap:8px}
+.summary span{background:var(--bg);border-radius:999px;padding:6px 12px;font-size:.85rem;color:var(--muted);font-weight:600}
+.summary strong{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:800}
+.example{font-size:.75rem;color:var(--muted);font-style:italic}
+
+/* alerts */
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alerts:empty{display:none}
+.alert{border-radius:16px;padding:11px 14px;font-size:.88rem;font-weight:600;background:var(--soft);color:var(--strong)}
+.alert.warn{--c:var(--sun)} .alert.crit{--c:var(--coral)} .alert.info{--c:var(--sky)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px;scrollbar-width:none;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;box-shadow:0 8px 20px -16px color-mix(in srgb,var(--ink) 50%,transparent)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1 0 auto;display:flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-display);font-weight:700;font-size:.95rem;border:0;border-radius:999px;padding:7px 14px 6px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.tabs button::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.tabs button:hover{background:var(--soft)}
+.tabs button[aria-selected=true]{background:var(--c);color:var(--onc)}
+.tabs button[aria-selected=true]::before{background:var(--onc);opacity:.7}
+
+/* panels */
+.panel{padding-top:0;overflow:hidden}
+.phead{margin:0 -16px;padding:16px 16px 14px;background:var(--soft);display:flex;gap:12px;align-items:flex-start}
+.phead .pic{width:44px;height:44px;border-radius:14px;background:var(--c);color:var(--onc);display:grid;place-items:center;flex:none}
+.phead .pic svg{width:24px;height:24px}
+.panel h2{font-family:var(--f-display);font-weight:800;font-size:1.3rem;margin:0;line-height:1.1;text-wrap:balance}
+.panel h3{font-family:var(--f-display);font-weight:700;font-size:1.12rem;margin:6px 0 0;display:flex;align-items:center;gap:8px}
+.panel h3::before{content:"";width:12px;height:12px;border-radius:4px;background:var(--c);transform:rotate(45deg)}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--surface);color:var(--strong);margin-top:6px}
+.tag.op{color:color-mix(in srgb,var(--sun) 60%,var(--ink))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--soft);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;min-width:0;flex:1 1 130px}
+.chip span{font-size:.72rem;color:var(--muted);font-weight:800}
+.chip b{font-family:var(--f-display);font-weight:800;font-size:1.3rem;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--strong)}
+.chip i{font-style:normal;font-size:.78rem;color:var(--muted);font-weight:600}
+.chip.hl,.chip.bl{background:var(--c);}
+.chip.hl b,.chip.bl b,.chip.hl span,.chip.bl span,.chip.hl i,.chip.bl i{color:var(--onc)}
+.chip.hl i,.chip.bl i,.chip.hl span,.chip.bl span{opacity:.85}
+.tbl{overflow-x:auto;border-radius:16px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:.72rem;color:var(--muted);text-align:right;font-weight:800;padding:8px 10px;background:var(--bg)}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:10px;border-top:1px solid var(--line);white-space:nowrap;vertical-align:top;font-weight:600}
+td.big{font-family:var(--f-display);font-weight:800;font-size:1.2rem;color:var(--strong)}
+td small{display:block;color:var(--muted);font-size:.75rem;white-space:normal;font-family:var(--f-body);font-weight:600}
+.toggle{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;cursor:pointer;font-weight:600}
+.toggle input{width:20px;height:20px;margin-top:2px;accent-color:var(--c);flex:none}
+.note{font-size:.88rem;color:var(--muted);margin:0}
+.recipe{border:2px dashed var(--c);background:var(--soft);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.recipe .lbl{color:var(--strong)}
+.recipe ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:.95rem}
+.recipe ol li::marker{font-family:var(--f-display);font-weight:800;color:var(--strong)}
+.recipe b{font-variant-numeric:tabular-nums;color:var(--strong)}
+ul.pts{margin:0;padding:0;list-style:none;font-size:.9rem;display:flex;flex-direction:column;gap:8px}
+ul.pts li{position:relative;padding-left:22px}
+ul.pts li::before{content:"";position:absolute;left:4px;top:.5em;width:9px;height:9px;border-radius:50%;background:var(--c)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;font-size:.85rem;font-weight:700}
+.bar .track{background:var(--bg);border-radius:999px;height:30px;position:relative;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px;min-width:2px}
+.bar:nth-child(1) .fill{background:var(--mint)} .bar:nth-child(2) .fill{background:var(--coral)} .bar:nth-child(3) .fill{background:var(--sky)}
+.bar .val{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-weight:800;font-variant-numeric:tabular-nums;font-size:.88rem;background:var(--surface);padding:1px 8px;border-radius:999px}
+.prodlist{display:flex;flex-direction:column;gap:10px}
+.prodc{border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.prodc h4{margin:0;font-family:var(--f-display);font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:8px;line-height:1.15}
+.prodc h4::before{content:"";width:10px;height:14px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--c);flex:none}
+.prodc p{margin:0;font-size:.85rem;color:var(--muted)}
+.prodc .dv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prodc .dv div{background:var(--soft);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.prodc .dv span{font-size:.7rem;font-weight:800;color:var(--muted)}
+.prodc .dv b{font-variant-numeric:tabular-nums;font-size:.98rem;line-height:1.25}
+.prodc .dv b.v{font-family:var(--f-display);font-size:1.2rem;color:var(--strong)}
+.prodc .dv i{font-style:normal;font-size:.78rem;color:var(--muted);font-weight:600}
+.evid{font-size:.85rem;background:var(--bg);border-radius:14px;padding:10px 12px}
+.evid b{color:var(--strong)}
+.evid small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 16px;--c:var(--mint)}
+summary{font-family:var(--f-display);font-weight:700;font-size:1.1rem;padding:14px 0;cursor:pointer;display:flex;align-items:center;gap:8px}
+summary::before{content:"";width:12px;height:12px;border-radius:4px;background:var(--c);transform:rotate(45deg)}
+details[open]{padding-bottom:16px}
+details .inner{display:flex;flex-direction:column;gap:12px}
+footer{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;padding:0 4px}
+footer ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+@media (max-width:380px){.seg label small{display:none}.bar{grid-template-columns:86px 1fr}.mascot{width:72px;height:82px}.hero h1{font-size:1.7rem}.prodc .dv{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.bar .fill{transition:width .35s ease}}
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20h14l-1.6-10H6.6z"/><circle cx="12" cy="6" r="2.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-balloon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15c3.5 0 6-3 6-6.5S15.3 2.5 12 2.5 6 5 6 8.5 8.5 15 12 15z"/><path d="M11 15l1 2 1-2M12 17c0 2-2 2.5-2 4.5"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></symbol>
+  <symbol id="i-steps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 19h4v-5h4v-5h4V4h4"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/></symbol>
+  <symbol id="i-blood" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="14" rx="3"/><path d="M12 17v4M9 21h6M12 7.5c-1.5 2-2 3-2 4a2 2 0 0 0 4 0c0-1-.5-2-2-4z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="hero c-sky">
+    <div class="hero-txt">
+      <span class="kicker">Anestesia pediátrica</span>
+      <h1>Hidratação <span>Pediátrica</span></h1>
+      <p>Fluidos, preparo de glicose e hemoterapia por peso</p>
+    </div>
+    <svg class="mascot" viewBox="0 0 92 104" aria-hidden="true">
+      <circle cx="12" cy="20" r="5" fill="var(--sun)"/>
+      <circle cx="82" cy="34" r="3.5" fill="var(--coral)"/>
+      <circle cx="18" cy="48" r="3" fill="var(--mint)"/>
+      <path d="M50 6C50 6 18 44 18 66a32 32 0 0 0 64 0C82 44 50 6 50 6z" fill="var(--sky)"/>
+      <path d="M36 42c-4 6-7 12-7 18" stroke="var(--surface)" stroke-width="5" stroke-linecap="round" fill="none" opacity=".45"/>
+      <ellipse cx="40" cy="66" rx="5" ry="6" fill="var(--surface)"/><ellipse cx="60" cy="66" rx="5" ry="6" fill="var(--surface)"/>
+      <circle cx="41" cy="67.5" r="2.6" fill="#1d2939"/><circle cx="61" cy="67.5" r="2.6" fill="#1d2939"/>
+      <circle cx="32" cy="77" r="4" fill="var(--coral)" opacity=".55"/><circle cx="68" cy="77" r="4" fill="var(--coral)" opacity=".55"/>
+      <path d="M43 79q7 6 14 0" stroke="#1d2939" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    </svg>
+  </header>
+
+  <section class="card" aria-label="Dados do paciente">
+    <div class="grid">
+      <div class="field">
+        <label for="peso"><i class="ic c-mint"><svg><use href="#i-scale"/></svg></i>Peso (kg)</label>
+        <input id="peso" type="number" inputmode="decimal" min="0.5" max="100" step="0.1" value="14">
+      </div>
+      <div class="field">
+        <label for="jejum"><i class="ic c-grape"><svg><use href="#i-clock"/></svg></i>Jejum (h)</label>
+        <input id="jejum" type="number" inputmode="decimal" min="0" max="24" step="0.5" value="4">
+      </div>
+      <div class="field full">
+        <label for="idade"><i class="ic c-coral"><svg><use href="#i-balloon"/></svg></i>Idade</label>
+        <div class="age">
+          <input id="idade" type="number" inputmode="decimal" min="0" max="216" step="1" value="3">
+          <select id="unidade" aria-label="Unidade da idade"><option value="a">anos</option><option value="m">meses</option><option value="d">dias</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="porteLbl">Porte cirúrgico</span>
+      <div class="seg" role="radiogroup" aria-labelledby="porteLbl">
+        <input type="radio" name="porte" id="p1" value="menor"><label for="p1"><span class="dots"><i></i><i></i><i></i></span><b>Menor</b><small>Hérnia, postectomia, ORL</small></label>
+        <input type="radio" name="porte" id="p2" value="moderado" checked><label for="p2"><span class="dots"><i></i><i></i><i></i></span><b>Moderado</b><small>Laparoscopia, ortopedia</small></label>
+        <input type="radio" name="porte" id="p3" value="maior"><label for="p3"><span class="dots"><i></i><i></i><i></i></span><b>Maior</b><small>Laparotomia, tórax, grandes perdas</small></label>
+      </div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <span class="example">Valores iniciais são um exemplo (14 kg, 3 anos, jejum de 4 h). Substitua pelos dados do paciente.</span>
+  </section>
+
+  <div class="alerts" id="alerts" aria-live="polite"></div>
+
+  <nav class="tabs" role="tablist" aria-label="Seção">
+    <button role="tab" id="t-hs" aria-controls="hs" aria-selected="true">Holliday-Segar</button>
+    <button role="tab" id="t-berry" aria-controls="berry" aria-selected="false">Berry</button>
+    <button role="tab" id="t-eu" aria-controls="eu" aria-selected="false">Consenso europeu</button>
+    <button role="tab" id="t-prep" aria-controls="prep" aria-selected="false">Preparo glicose</button>
+    <button role="tab" id="t-sangue" aria-controls="sangue" aria-selected="false">Sangue</button>
+    <button role="tab" id="t-cmp" aria-controls="cmp" aria-selected="false">Comparar</button>
+  </nav>
+
+  <!-- Holliday-Segar + Furman -->
+  <section class="card panel" id="hs" role="tabpanel" aria-labelledby="t-hs">
+    <div class="phead"><span class="pic"><svg><use href="#i-drop"/></svg></span><div><h2>Holliday-Segar (4-2-1) + déficit de Furman</h2><span class="tag op">Regra empírica · Oxford 5</span></div></div>
+    <div class="chips" id="hsChips"></div>
+    <label class="toggle"><input type="checkbox" id="perdas"><span>Somar perdas cirúrgicas clássicas (“terceiro espaço”): <b id="perdaTxt"></b></span></label>
+    <div class="tbl"><table><thead><tr><th>Hora</th><th>mL/h</th><th>mL/kg/h</th><th>Macrogotas/min</th></tr></thead><tbody id="hsBody"></tbody></table></div>
+    <p class="note">Déficit = manutenção × horas de jejum. Repor 50% na 1ª hora e 25% na 2ª e na 3ª, somados à manutenção (Furman, 1975). Microgotas/min = mL/h.</p>
+    <ul class="pts">
+      <li>Usar sempre solução <b>isotônica</b>. A fórmula nasceu com hipotônicos, que causam hiponatremia.</li>
+      <li>Com jejum curto (líquidos claros até 1 h), o déficit calculado tende a superestimar o real.</li>
+      <li>As perdas de “terceiro espaço” vêm de opinião de especialistas e favorecem sobrecarga hídrica.</li>
+    </ul>
+  </section>
+
+  <!-- Berry -->
+  <section class="card panel" id="berry" role="tabpanel" aria-labelledby="t-berry" hidden>
+    <div class="phead"><span class="pic"><svg><use href="#i-steps"/></svg></span><div><h2>Berry (1986)</h2><span class="tag op">Opinião de especialista · Oxford 5</span></div></div>
+    <div class="chips" id="berryChips"></div>
+    <div class="tbl"><table><thead><tr><th>Hora</th><th>mL/h</th><th>mL/kg/h</th><th>Macrogotas/min</th></tr></thead><tbody id="berryBody"></tbody></table></div>
+    <p class="note">1ª hora: 25 mL/kg em menores de 4 anos (Berry: até 3 anos) ou 15 mL/kg a partir de 4 anos. Depois: 4 mL/kg/h de manutenção, 6 com trauma leve, 8 com trauma moderado. O valor de 10 mL/kg/h para porte maior é uma extrapolação usada em textos didáticos.</p>
+    <ul class="pts">
+      <li>Já embute déficit e perdas. Não somar o déficit de Furman.</li>
+      <li>Escala linear por kg: em crianças maiores os volumes ficam altos. Acima de cerca de 40 kg, preferir critérios de adulto ou metas.</li>
+      <li>Pressupunha jejum prolongado. Com jejum curto, considerar a 1ª hora menor.</li>
+    </ul>
+  </section>
+
+  <!-- European consensus -->
+  <section class="card panel" id="eu" role="tabpanel" aria-labelledby="t-eu" hidden>
+    <div class="phead"><span class="pic"><svg><use href="#i-globe"/></svg></span><div><h2>Consenso europeu (Sümpelmann 2017) · AWMF S1</h2><span class="tag">Consenso de especialistas · base observacional</span></div></div>
+    <div class="chips" id="euChips"></div>
+    <div class="tbl"><table><thead><tr><th>Etapa</th><th>Volume</th><th>mL/kg</th></tr></thead><tbody id="euBody"></tbody></table></div>
+    <div class="chips" id="glicChips"></div>
+    <p class="note">Sem solução balanceada com glicose pronta: veja a aba <b>Preparo glicose</b> para montar a solução a 1% ou 2,5% com as ampolas disponíveis.</p>
+    <ul class="pts">
+      <li>A solução com glicose é só para a infusão de base. Bolus de volume sempre sem glicose.</li>
+      <li>Ajustar a taxa após a 1ª hora pela hemodinâmica, perdas e duração. Em cirurgias longas, costuma ser possível reduzir.</li>
+      <li>Monitorar glicemia em neonatos, desnutridos e procedimentos longos.</li>
+    </ul>
+  </section>
+
+  <!-- Glucose preparation -->
+  <section class="card panel" id="prep" role="tabpanel" aria-labelledby="t-prep" hidden>
+    <div class="phead"><span class="pic"><svg><use href="#i-flask"/></svg></span><div><h2>Preparo da solução com glicose 1% ou 2,5%</h2><span class="tag op">Cálculo farmacotécnico · validar com a farmácia</span></div></div>
+    <div class="grid">
+      <div class="field"><label for="gBase">Solução base</label>
+        <select id="gBase"><option value="rl">Ringer lactato</option><option value="pl">Plasma-Lyte</option><option value="sf">Soro fisiológico 0,9%</option></select></div>
+      <div class="field"><label for="gVol">Frasco (mL)</label>
+        <select id="gVol"><option>100</option><option>250</option><option selected>500</option><option>1000</option></select></div>
+      <div class="field"><label for="gAlvo">Concentração final</label>
+        <select id="gAlvo"><option value="1">Glicose 1%</option><option value="2.5">Glicose 2,5%</option></select></div>
+      <div class="field"><label for="gAmp">Ampola (10 mL)</label>
+        <select id="gAmp"><option value="50">Glicose 50%</option><option value="25">Glicose 25%</option><option value="10">Glicose 10%</option></select></div>
+    </div>
+    <div class="recipe" id="recipe"></div>
+    <div class="alerts" id="gAlerts"></div>
+    <span class="lbl">Tabela rápida · retirar do frasco o mesmo volume que será adicionado</span>
+    <div class="tbl"><table><thead><tr><th>Ampola</th><th>250 mL a 1%</th><th>250 mL a 2,5%</th><th>500 mL a 1%</th><th>500 mL a 2,5%</th></tr></thead><tbody id="gTable"></tbody></table></div>
+    <ul class="pts">
+      <li><b>Por que retirar volume:</b> mantém o volume final e torna a concentração exata. Sem retirar, 1 ampola de glicose 50% em 500 mL dá 0,98%, e 2,5 ampolas dão 2,38%. As duas diferenças são clinicamente irrelevantes.</li>
+      <li><b>Preferir glicose 50%:</b> adiciona menos volume sem eletrólitos e dilui menos o sódio da solução base.</li>
+      <li><b>Soro fisiológico:</b> não é balanceado e causa acidose hiperclorêmica em volumes maiores. Reservar para indicações específicas, como alcalose hipoclorêmica (estenose hipertrófica de piloro) ou neurocirurgia.</li>
+      <li><b>Segurança:</b> técnica asséptica, homogeneizar, rotular com concentração, data, hora e responsável, e dupla checagem. Seguir a norma institucional de validade; como referência, a USP 797 pede início da infusão em até 4 h para preparo de uso imediato.</li>
+    </ul>
+  </section>
+
+  <!-- Blood -->
+  <section class="card panel" id="sangue" role="tabpanel" aria-labelledby="t-sangue" hidden>
+    <div class="phead"><span class="pic"><svg><use href="#i-blood"/></svg></span><div><h2>Perda sanguínea e hemoterapia</h2><span class="tag">ECR em neonatos e UTI pediátrica · consensos TAXI e TAXI-CAB</span></div></div>
+
+    <div class="grid">
+      <div class="field full"><label for="vseCat">Faixa para volemia estimada</label>
+        <select id="vseCat"><option value="auto">Automática pela idade</option><option value="prem">Prematuro · 90–100 mL/kg</option><option value="rn">RN a termo · 80–90 mL/kg</option><option value="lact">Lactente · 75–80 mL/kg</option><option value="cri">Criança · 70–75 mL/kg</option></select></div>
+      <div class="field full"><label for="cond">Condição clínica (define o Ht mínimo)</label>
+        <select id="cond"></select></div>
+      <div class="field"><label for="hti">Ht atual (%)</label><input id="hti" type="number" inputmode="decimal" min="10" max="70" step="1" value="36"></div>
+      <div class="field"><label for="htf">Ht mínimo aceito (%)</label><input id="htf" type="number" inputmode="decimal" min="10" max="60" step="1" value="21"></div>
+    </div>
+    <div class="evid" id="condEvid"></div>
+    <div class="chips" id="abl"></div>
+    <p class="note">PSMP = VSE × (Ht atual − Ht mínimo) ÷ Ht atual. Ht ≈ Hb × 3. O limiar é um ponto de partida; sangramento ativo, instabilidade, saturação venosa e lactato pesam mais que o número.</p>
+
+    <h3>Concentrado de hemácias</h3>
+    <div class="grid">
+      <div class="field"><label for="htd">Ht desejado (%)</label><input id="htd" type="number" inputmode="decimal" min="15" max="55" step="1" value="30"></div>
+      <div class="field"><label for="htb">Ht da bolsa (%)</label><input id="htb" type="number" inputmode="decimal" min="50" max="80" step="1" value="60"></div>
+    </div>
+    <div class="chips" id="chCalc"></div>
+    <p class="note">Volume = VSE × (Ht desejado − Ht atual) ÷ Ht da bolsa. Bolsa com solução aditiva: Ht 50–70%. Regra prática: 10–15 mL/kg elevam a Hb em cerca de 2–3 g/dL.</p>
+
+    <h3>Hemocomponentes e hemoderivados</h3>
+    <div class="prodlist" id="prodBody"></div>
+
+    <h3>Albumina 5% a partir da albumina 20%</h3>
+    <div class="recipe" id="albRecipe"></div>
+    <ul class="pts">
+      <li><b>Nunca diluir em água destilada:</b> a solução fica hipotônica e causa hemólise grave, com relatos de óbito.</li>
+      <li>Diluir em soro fisiológico 0,9% (preferencial) ou glicose 5%, na proporção 1 parte de albumina 20% para 3 partes de diluente.</li>
+      <li>Albumina 5% é isoncótica e serve como expansor. A 20% é hiperoncótica, útil quando o objetivo é menor volume.</li>
+    </ul>
+
+    <div class="alert warn">Doses de concentrado de fibrinogênio, complexo protrombínico e ácido tranexâmico em crianças vêm de estudos pequenos, séries e consensos. Octaplex não tem uso pediátrico aprovado em bula. Guiar por tromboelastometria (ROTEM/TEG) e pelo protocolo de hemorragia da instituição.</div>
+  </section>
+
+  <!-- Compare -->
+  <section class="card panel" id="cmp" role="tabpanel" aria-labelledby="t-cmp" hidden>
+    <div class="phead"><span class="pic"><svg><use href="#i-chart"/></svg></span><div><h2>Comparação entre fórmulas</h2><span class="tag">Mesmo paciente, três abordagens</span></div></div>
+    <span class="lbl">Volume na 1ª hora</span>
+    <div class="bars" id="bars"></div>
+    <div class="tbl"><table><thead><tr><th>Método</th><th>1ª hora</th><th>Horas seguintes</th></tr></thead><tbody id="cmpBody"></tbody></table></div>
+    <p class="note">Holliday-Segar sem perdas clássicas. Consenso europeu com a taxa inicial de 10 mL/kg/h, sem bolus adicionais.</p>
+  </section>
+
+  <details>
+    <summary>Manutenção pós-operatória</summary>
+    <div class="inner">
+      <div class="chips" id="posop"></div>
+      <p class="note">Solução isotônica com dextrose e KCl até dieta oral plena (AAP 2018: recomendação forte, evidência A). NICE NG29: considerar 50–80% da manutenção se houver risco de retenção hídrica. Dosar sódio em infusões prolongadas.</p>
+    </div>
+  </details>
+
+  <footer>
+    <span>Ferramenta educacional. Não substitui o julgamento clínico, o protocolo institucional nem a bula. Confira os valores antes de usar.</span>
+    <ol>
+      <li>Holliday MA, Segar WE. Pediatrics 1957;19:823-32.</li>
+      <li>Furman EB et al. Anesthesiology 1975;42:187-93.</li>
+      <li>Berry FA. Anesthetic management of difficult and routine pediatric patients. 1986.</li>
+      <li>Sümpelmann R et al. Paediatr Anaesth 2017;27:10-18.</li>
+      <li>Feld LG et al. Pediatrics 2018;142:e20183083.</li>
+      <li>NICE NG29. IV fluid therapy in children. 2015, atualizada 2020.</li>
+      <li>Lacroix J et al. (TRIPICU). N Engl J Med 2007;356:1609-19.</li>
+      <li>Valentine SL et al. (TAXI). Pediatr Crit Care Med 2018;19:884-98.</li>
+      <li>Nellis ME et al. (TAXI-CAB). Pediatr Crit Care Med 2022;23:34-51.</li>
+      <li>Kirpalani H et al. (TOP). N Engl J Med 2020;383:2639-51.</li>
+      <li>Franz AR et al. (ETTNO). JAMA 2020;324:560-70.</li>
+      <li>Curley A et al. (PlaNeT-2). N Engl J Med 2019;380:242-51.</li>
+      <li>Howard J et al. (TAPS). Lancet 2013;381:930-8.</li>
+      <li>Kietaibl S et al. ESAIC: management of severe perioperative bleeding. Eur J Anaesthesiol 2023;40:226-304.</li>
+      <li>Ministério da Saúde. Guia para uso de hemocomponentes. 2ª ed. 2015.</li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=(n,d=0)=>(Math.round(n*10**d)/10**d).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const LOSS={menor:2,moderado:4,maior:6};
+  const BERRY={menor:6,moderado:8,maior:10};
+  const VSE={prem:[90,100,'Prematuro'],rn:[80,90,'RN a termo'],lact:[75,80,'Lactente'],cri:[70,75,'Criança']};
+
+  const COND=[
+    ['Criança estável, sem cardiopatia',21,'Hb 7 g/dL (Ht ~21%). TRIPICU (ECR, n=637): estratégia restritiva não inferior à liberal. TAXI: recomendação forte.'],
+    ['Sepse ou oncológico, estável',21,'Hb 7 g/dL (Ht ~21%). TAXI: recomendação com evidência moderada a baixa; em choque séptico instável, decisão clínica.'],
+    ['Cardiopatia acianótica ou correção biventricular',21,'Hb 7–8 g/dL (Ht 21–24%) se estável. TAXI: evidência baixa; ECRs pequenos em cirurgia cardíaca.'],
+    ['Cardiopatia cianótica ou fisiologia univentricular',27,'Hb ≥9 g/dL (Ht ≥27%) pelo TAXI. Muitos serviços usam Ht 35–45% conforme a saturação: opinião de especialistas.'],
+    ['TCE grave',24,'Hb 7–10 g/dL (Ht 21–30%). TAXI: sem evidência suficiente; faixa por consenso.'],
+    ['RN a termo ou lactente < 4 meses',30,'Ht 25–30% em cirurgia eletiva; mais alto se houver suporte respiratório. Opinião de especialistas, sem ECR perioperatório.'],
+    ['Prematuro · 1ª semana · com suporte respiratório',33,'Hb 11 g/dL (Ht ~33%). TOP e ETTNO (ECRs, n=1824 e 1013): limiares restritivos sem aumento de óbito ou deficiência neurológica.'],
+    ['Prematuro · 1ª semana · sem suporte',30,'Hb 10 g/dL (Ht ~30%). Limiar restritivo do TOP.'],
+    ['Prematuro · 2ª semana · com suporte',30,'Hb 10 g/dL (Ht ~30%). Limiar restritivo do TOP.'],
+    ['Prematuro · 2ª semana · sem suporte',26,'Hb 8,5 g/dL (Ht ~26%). Limiar restritivo do TOP.'],
+    ['Prematuro · ≥3ª semana · com suporte',26,'Hb 8,5 g/dL (Ht ~26%). Limiar restritivo do TOP.'],
+    ['Prematuro · ≥3ª semana · sem suporte',21,'Hb 7 g/dL (Ht ~21%). Limiar restritivo do TOP.'],
+    ['Doença falciforme (pré-operatório)',30,'Transfundir até Hb ~10 g/dL antes de anestesia geral em procedimentos de risco moderado (TAPS, ECR). Não ultrapassar Hb 11 g/dL pela hiperviscosidade. Ht aqui é o alvo, não o mínimo.'],
+    ['Hemorragia ativa ou instabilidade',null,'Não usar limiar de Hb/Ht: a Hb atrasa em relação à perda. Repor por hemodinâmica, perda estimada e ROTEM/TEG, com protocolo de transfusão maciça.']
+  ];
+  $('cond').innerHTML=COND.map((c,i)=>`<option value="${i}">${c[0]}${c[1]?` · Ht ${c[1]}%`:''}</option>`).join('');
+
+  function maint(w){ if(w<=10) return 4*w; if(w<=20) return 40+2*(w-10); return 60+(w-20); }
+  function daily(w){ if(w<=10) return 100*w; if(w<=20) return 1000+50*(w-10); return 1500+20*(w-20); }
+
+  function read(){
+    const w=parseFloat($('peso').value), a=parseFloat($('idade').value), u=$('unidade').value;
+    const f=parseFloat($('jejum').value);
+    const months = isNaN(a)?NaN : u==='a'? a*12 : u==='m'? a : a/30.4;
+    const porte=document.querySelector('input[name=porte]:checked').value;
+    return {w,months,f:isNaN(f)?0:f,porte};
+  }
+  function row(label,mlh,w,sub){
+    return `<tr><td>${label}${sub?`<small>${sub}</small>`:''}</td><td class="big">${fmt(mlh)}</td><td>${fmt(mlh/w,1)}</td><td>${fmt(mlh/3)}</td></tr>`;
+  }
+  function chip(label,val,sub,cls){return `<div class="chip ${cls||''}"><span>${label}</span><b>${val}</b>${sub?`<i>${sub}</i>`:''}</div>`;}
+  function prod(name,ind,dose,vol,volSub){return `<article class="prodc"><h4>${name}</h4><div class="dv"><div><span>Dose</span><b>${dose}</b></div><div><span>Para o peso</span><b class="v">${vol}</b>${volSub?`<i>${volSub}</i>`:''}</div></div><p>${ind}</p></article>`;}
+
+  function glucose(){
+    const base=$('gBase').value, V=parseFloat($('gVol').value), c=parseFloat($('gAlvo').value)/100, S=parseFloat($('gAmp').value)/100;
+    const x=c*V/S, amps=x/10, dil=x/V;
+    const baseName={rl:'Ringer lactato',pl:'Plasma-Lyte',sf:'soro fisiológico 0,9%'}[base];
+    const osmBase={rl:273,pl:294,sf:308}[base];
+    const osm=osmBase*(1-dil)+c*1000*10/180;
+    $('recipe').innerHTML=`<span class="lbl">Receita · ${baseName} ${V} mL → glicose ${fmt(c*100,1)}%</span>
+      <ol><li>Retirar e desprezar <b>${fmt(x,1)} mL</b> do frasco de ${baseName}.</li>
+      <li>Adicionar <b>${fmt(x,1)} mL</b> de glicose ${fmt(S*100)}% = <b>${fmt(amps,2)} ampola${amps>1?'s':''}</b> de 10 mL (${fmt(x*S,2)} g de glicose).</li>
+      <li>Homogeneizar e rotular: “${baseName} + glicose ${fmt(c*100,1)}%”, data, hora, responsável.</li></ol>
+      <span class="note">Osmolaridade teórica ≈ ${fmt(osm)} mOsm/L (${baseName}: ${osmBase}). A glicose é metabolizada, e o efeito in vivo é de solução isotônica.</span>`;
+    const al=[];
+    if(dil>0.1) al.push(['warn',`O volume de glicose ${fmt(S*100)}% representa ${fmt(dil*100)}% do frasco e dilui o sódio e os demais eletrólitos na mesma proporção. Prefira glicose 50%.`]);
+    if(Math.abs(amps*2-Math.round(amps*2))>0.01) al.push(['info',`Fração de ampola: aspirar com seringa o volume exato (${fmt(x,1)} mL).`]);
+    $('gAlerts').innerHTML=al.map(a=>`<div class="alert ${a[0]}">${a[1]}</div>`).join('');
+    const cell=(vol,cc,s)=>{const v=cc*vol/s;return `${fmt(v,1)} mL<small>${fmt(v/10,2)} amp.</small>`;};
+    $('gTable').innerHTML=[50,25,10].map(p=>{const s=p/100;return `<tr><td>Glicose ${p}%</td><td>${cell(250,.01,s)}</td><td>${cell(250,.025,s)}</td><td>${cell(500,.01,s)}</td><td>${cell(500,.025,s)}</td></tr>`;}).join('');
+  }
+
+  function blood(w,months){
+    let cat=$('vseCat').value;
+    if(cat==='auto') cat = isNaN(months)?'cri' : months<1?'rn' : months<12?'lact' : 'cri';
+    const [lo,hi,nm]=VSE[cat], mid=(lo+hi)/2;
+    const vLo=lo*w, vHi=hi*w, vMid=mid*w;
+    const ci=parseInt($('cond').value), c=COND[ci];
+    $('condEvid').innerHTML=`<b>${c[0]}</b><small>${c[2]}</small>`;
+    const hti=parseFloat($('hti').value), htf=parseFloat($('htf').value);
+    let abl='—', ablSub='';
+    if(c[1]===null){ abl='Não aplicável'; ablSub='repor por clínica e ROTEM/TEG'; }
+    else if(hti>0&&htf>0&&htf<hti){ abl=`${fmt(vLo*(hti-htf)/hti)}–${fmt(vHi*(hti-htf)/hti)} mL`; ablSub=`${fmt(lo*(hti-htf)/hti)}–${fmt(hi*(hti-htf)/hti)} mL/kg`; }
+    else if(hti>0&&htf>=hti){ abl='0 mL'; ablSub='Ht atual já no limiar'; }
+    $('abl').innerHTML=chip('Volemia estimada',`${fmt(vLo)}–${fmt(vHi)} mL`,`${nm} · ${lo}–${hi} mL/kg`)+chip('Perda máxima permitida',abl,ablSub,'bl');
+
+    const htd=parseFloat($('htd').value), htb=parseFloat($('htb').value);
+    let ch='—', chSub='Ht desejado deve ser maior que o atual';
+    if(htd>hti&&htb>0){ const v=vMid*(htd-hti)/htb; ch=fmt(v)+' mL'; chSub=`${fmt(v/w,1)} mL/kg · VSE média ${mid} mL/kg`; }
+    $('chCalc').innerHTML=chip('Volume pela fórmula',ch,chSub,'bl')+chip('Regra prática 10–15 mL/kg',`${fmt(10*w)}–${fmt(15*w)} mL`,'↑ Hb ~2–3 g/dL');
+
+    const rnd=n=>Math.max(1,Math.round(n));
+    const fibLo=30*w, fibHi=50*w, octLo=20*w, octHi=30*w;
+    const txa=Math.min(15*w,1000), txaLo=Math.min(10*w,1000);
+    let rows='';
+    rows+=prod('Plasma fresco congelado','Sangramento com TP/TTPa > 1,5× ou ROTEM alterado. Não transfundir para corrigir INR isolado sem sangramento (TAXI-CAB).','10–20 mL/kg',`${fmt(10*w)}–${fmt(20*w)} mL`,'↑ fatores ~15–20%');
+    rows+=prod('Plaquetas','< 50 mil para cirurgia; < 100 mil em neurocirurgia, sangramento ativo ou CEC. Prematuro sem sangramento: limiar de 25 mil (PlaNeT-2, ECR).','10–15 mL/kg (aférese) ou 1 U randômica/10 kg',`${fmt(10*w)}–${fmt(15*w)} mL`,`ou ${rnd(w/10)} U randômica${rnd(w/10)>1?'s':''}`);
+    rows+=prod('Crioprecipitado','Fibrinogênio < 1,5–2 g/L com sangramento, quando não há concentrado de fibrinogênio.','1–2 U/10 kg',`${fmt(Math.max(1,w/10),0)}–${fmt(Math.max(1,w/5),0)} U`,'~15–20 mL e 150–250 mg de fibrinogênio por U');
+    rows+=prod('Concentrado de fibrinogênio (Haemocomplettan P)','Fibrinogênio < 1,5–2 g/L ou FIBTEM A10 < 7–8 mm com sangramento. Frasco 1 g + 50 mL de água = 20 mg/mL. Dose pelo alvo: (alvo − medido, g/L) ÷ 0,017 mg/kg (bula de adulto; recuperação menor em crianças).','30–50 mg/kg',`${fmt(fibLo)}–${fmt(fibHi)} mg`,`${fmt(fibLo/20)}–${fmt(fibHi/20)} mL · ${fmt(Math.ceil(fibHi/1000))} frasco${Math.ceil(fibHi/1000)>1?'s':''} de 1 g`);
+    rows+=prod('Complexo protrombínico 4 fatores (Octaplex)','Reversão de antagonista da vitamina K (associar vitamina K) ou sangramento grave com déficit de fatores refratário. Off-label em pediatria; risco trombótico. 500 UI + 20 mL = 25 UI/mL. Infundir a 1 mL/min no início, até 2–3 mL/min.','20–30 UI/kg (fator IX)',`${fmt(octLo)}–${fmt(octHi)} UI`,`${fmt(octLo/25)}–${fmt(octHi/25)} mL · ${fmt(Math.ceil(octHi/500))} frasco${Math.ceil(octHi/500)>1?'s':''} de 500 UI`);
+    rows+=prod('Ácido tranexâmico','Cirurgias com sangramento esperado (escoliose, craniossinostose, cardíaca) ou hemorragia. Meta-análises de ECRs: menos transfusão sem aumento de trombose; dose ideal incerta. Ampola 250 mg/5 mL = 50 mg/mL.','10–15 mg/kg (máx. 1 g) + 1–5 mg/kg/h',`${fmt(txaLo)}–${fmt(txa)} mg`,`${fmt(txaLo/50,1)}–${fmt(txa/50,1)} mL · infusão ${fmt(w)}–${fmt(5*w)} mg/h`);
+    rows+=prod('Albumina 5%','Expansão volêmica quando cristaloide é insuficiente e não há indicação de hemocomponente. Preparo abaixo.','10–20 mL/kg (0,5–1 g/kg)',`${fmt(10*w)}–${fmt(20*w)} mL`,`${fmt(0.5*w,1)}–${fmt(w,1)} g`);
+    $('prodBody').innerHTML=rows;
+
+    const alb=20*w, alb20=alb/4, dil=alb-alb20, vials=Math.ceil(alb20/50);
+    $('albRecipe').innerHTML=`<span class="lbl">Dose de 20 mL/kg = ${fmt(alb)} mL de albumina 5% (${fmt(alb*0.05,1)} g)</span>
+      <ol><li>Aspirar <b>${fmt(alb20,1)} mL</b> de albumina 20% (${vials} frasco${vials>1?'s':''} de 50 mL).</li>
+      <li>Diluir em <b>${fmt(dil,1)} mL</b> de soro fisiológico 0,9%.</li>
+      <li>Frasco inteiro: <b>50 mL de albumina 20% + 150 mL de SF 0,9% = 200 mL a 5%</b> (10 g).</li></ol>
+      <span class="note">Para 10 mL/kg, use metade: ${fmt(alb20/2,1)} mL de albumina 20% + ${fmt(dil/2,1)} mL de SF.</span>`;
+  }
+
+  function calc(){
+    const {w,months,f,porte}=read();
+    glucose();
+    if(!(w>=0.5&&w<=100)){
+      $('alerts').innerHTML='<div class="alert crit">Informe um peso entre 0,5 e 100 kg para calcular.</div>';
+      return;
+    }
+    const alerts=[];
+    if(!isNaN(months)&&months<1) alerts.push(['crit','Neonato: nenhuma das fórmulas de hidratação foi validada nessa idade. Individualize, mantenha a oferta de glicose (nutrição parenteral ou glicose 10% se já em uso) e monitore glicemia e sódio.']);
+    if(w>40) alerts.push(['warn','Peso acima de 40 kg: as fórmulas pediátricas lineares (sobretudo Berry) superestimam volumes. Considere critérios de adulto ou terapia guiada por metas.']);
+    if(f>8) alerts.push(['warn','Jejum acima de 8 h: risco de hipovolemia e cetose. Avalie glicemia e considere repor o déficit.']);
+    if(!isNaN(months)&&months>=12){ const k=w/(months/12); if(k>20||k<1.5) alerts.push(['warn','Peso pouco compatível com a idade. Confira os dados.']); }
+    $('alerts').innerHTML=alerts.map(a=>`<div class="alert ${a[0]}">${a[1]}</div>`).join('');
+
+    const m=maint(w);
+    $('summary').innerHTML=`<span>Manutenção 4-2-1 <strong>${fmt(m)} mL/h</strong></span><span><strong>${fmt(daily(w))}</strong> mL/dia</span><span>Porte <strong>${porte}</strong></span>`;
+
+    const def=m*f, loss=$('perdas').checked? LOSS[porte]*w : 0;
+    $('perdaTxt').textContent=`${LOSS[porte]} mL/kg/h = ${fmt(LOSS[porte]*w)} mL/h`;
+    $('hsChips').innerHTML=chip('Manutenção',fmt(m)+' mL/h',null,'hl')+chip('Déficit total',fmt(def)+' mL');
+    const hs=[m+def*.5+loss, m+def*.25+loss, m+def*.25+loss, m+loss];
+    $('hsBody').innerHTML=row('1ª hora',hs[0],w,'manutenção + 50% déficit')+row('2ª hora',hs[1],w,'manutenção + 25% déficit')+row('3ª hora',hs[2],w,'manutenção + 25% déficit')+row('4ª h em diante',hs[3],w,'manutenção');
+
+    const under4 = isNaN(months)? true : months<48;
+    const b1=(under4?25:15)*w, bn=BERRY[porte]*w;
+    $('berryChips').innerHTML=chip('1ª hora',(under4?25:15)+' mL/kg',fmt(b1)+' mL','hl')+chip('Horas seguintes',BERRY[porte]+' mL/kg/h',fmt(bn)+' mL/h');
+    $('berryBody').innerHTML=row('1ª hora',b1,w,under4?'menor de 4 anos':'4 anos ou mais')+row('2ª h em diante',bn,w,'manutenção + trauma '+porte);
+
+    const base=10*w;
+    $('euChips').innerHTML=chip('Infusão de base','10 mL/kg/h',fmt(base)+' mL/h','hl')+chip('Solução','Balanceada','+ glicose 1–2,5%');
+    let eu=`<tr><td>Infusão de base, 1ª hora<small>balanceada com glicose 1–2,5%</small></td><td class="big">${fmt(base)}–${fmt(2*base)} mL</td><td>10–20</td></tr>`;
+    eu+=`<tr><td>Horas seguintes<small>ponto de partida; ajustar à resposta</small></td><td class="big">${fmt(base)} mL/h</td><td>10/h</td></tr>`;
+    if(porte!=='menor') eu+=`<tr><td>Bolus se instabilidade<small>balanceada sem glicose, repetir conforme resposta</small></td><td class="big">${fmt(10*w)}–${fmt(20*w)} mL</td><td>10–20</td></tr>`;
+    if(porte==='maior') eu+=`<tr><td>Coloide ou albumina<small>se cristaloide insuficiente e sem indicação de hemoderivado; considerar monitorização guiada por metas</small></td><td class="big">${fmt(5*w)}–${fmt(10*w)} mL</td><td>5–10</td></tr>`;
+    $('euBody').innerHTML=eu;
+    $('glicChips').innerHTML=chip('Glicose 1% a 10 mL/kg/h',fmt(10/6,1)+' mg/kg/min')+chip('Glicose 2,5% a 10 mL/kg/h',fmt(25/6,1)+' mg/kg/min');
+
+    const data=[['Holliday-Segar',m+def*.5,fmt(m)+' mL/h'],['Berry',b1,fmt(bn)+' mL/h'],['Consenso europeu',base,fmt(base)+' mL/h (ajustar)']];
+    const max=Math.max(...data.map(d=>d[1]),1);
+    $('bars').innerHTML=data.map(d=>`<div class="bar"><span>${d[0]}</span><div class="track"><div class="fill" style="width:${(d[1]/max*100).toFixed(1)}%"></div><span class="val">${fmt(d[1])} mL</span></div></div>`).join('');
+    $('cmpBody').innerHTML=data.map(d=>`<tr><td>${d[0]}</td><td class="big">${fmt(d[1])} mL</td><td>${d[2]}</td></tr>`).join('');
+
+    blood(w,months);
+    $('posop').innerHTML=chip('Manutenção plena',fmt(m)+' mL/h',null,'hl')+chip('Restrita 50–80%',fmt(m*.5)+'–'+fmt(m*.8)+' mL/h');
+  }
+
+  const tabs=[...document.querySelectorAll('[role=tab]')];
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>{x.setAttribute('aria-selected',x===t);$(x.getAttribute('aria-controls')).hidden=x!==t;});
+    t.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }));
+  $('cond').addEventListener('change',()=>{const c=COND[parseInt($('cond').value)]; if(c[1]) $('htf').value=c[1];});
+  document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calc));
+  calc();
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
